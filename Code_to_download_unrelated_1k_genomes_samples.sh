@@ -58,3 +58,11 @@ done < ${pop}_unrelated.txt
 cat  ${pop}_pulling/*_to_pull.txt >  ${pop}_to_pull.txt
 
 globus transfer $ENA: $Buffalo: --label ${pop} --batch  ${pop}_to_pull.txt
+
+rm ${pop}_all.txt
+rm ${pop}_unrelated.txt
+rm sample_links.txt
+rm tail_location.txt
+rm Individuals.txt
+rm Individuals_twice.txt
+rm adjusted_home_path.txt
