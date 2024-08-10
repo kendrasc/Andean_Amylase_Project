@@ -32,11 +32,7 @@ do
 # Pulls the correct directory for the population
     yes ${directory}${Pop}${individual}"/" | head -n ${Number_of_files} > tail_location.txt
 
-# Gets the ID number for each individual
-    grep "${individual}" 1k_Genomes_unrelated.txt | awk '{print $1}' > Individuals.txt
-    cat Individuals.txt Individuals.txt > Individuals_twice.txt
-
-    awk -F '[/]' '{print $NF}' sample_links.txt > fastq_file.txt
+    awk -F '[/]' '{print "/"$NF}' sample_links.txt > fastq_file.txt
     fastq_file_length=$(wc -l fastq_file.txt | awk '{print $1}')
 
     if (($test_count2 != $fastq_file_length)); then
@@ -44,7 +40,7 @@ do
         exit 1
     fi
 
-    paste -d'\0' tail_location.txt Individuals_twice.txt fastq_file.txt > adjusted_home_path.txt
+    paste -d'\0' tail_location.txt fastq_file.txt > adjusted_home_path.txt
 
     paste sample_links.txt adjusted_home_path.txt > ${individual}_to_pull.txt
 
