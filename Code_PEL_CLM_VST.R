@@ -21,14 +21,14 @@ tbl =
   ensembldb::select(edb, keys, columns, keytype = "GENENAME") %>%
   as_tibble()
 
-######### Pull Only Protein Coding Genes (23069) #######################
+######### Pull Only Protein Coding Genes #######################
 supportedFilters()
 filter = ~ gene_name %in% keys & gene_biotype == "protein_coding"
 tbl =
   ensembldb::select(edb, filter, columns) %>%
   as_tibble()
 
-##### Protein Coding Genes shared between the data sets (18928) ########
+##### Protein Coding Genes shared between the data sets ########
 filtered_data <- modern %>%
   dplyr::select(any_of(tbl$GENENAME))
 
