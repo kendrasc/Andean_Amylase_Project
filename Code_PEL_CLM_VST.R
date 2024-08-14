@@ -1,4 +1,4 @@
-setwd("~/Desktop/Gene_CNVs")
+setwd("~/set/directory/here")
 library(dplyr)
 library(ggplot2)
 library(ggrepel)
@@ -6,8 +6,8 @@ library(AnnotationHub)
 library(ensembldb)
 library(dplyr)
 
+modern = read.csv("mrcanavar_results.csv")
 ######################################### Filtering data for Protein Coding Genes #######################################################################
-
 
 ############# Pulls all genes from Human Ensembl #######################
 hub = AnnotationHub()
