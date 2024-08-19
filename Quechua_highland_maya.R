@@ -1,5 +1,3 @@
-setwd("~/Desktop/Gene_CNVs")
-
 if (!requireNamespace("BiocManager", quietly = TRUE))
   install.packages("BiocManager")
 BiocManager::install(version = "3.19")
@@ -22,11 +20,7 @@ library(ensembldb)
 ################# American  genomes populations ########################
 Americas = read.delim("Americas_all_genes.txt", header = TRUE, sep = "\t")
 
-################ HGDP populations ######################################
-HGDP = read.delim("HGDP.txt", header = T, sep = "\t")
-
 ######################################### Filtering data for Protein Coding Genes #######################################################################
-
 
 ############# Pulls all genes from Human Ensembl #######################
 hub = AnnotationHub()
@@ -54,7 +48,6 @@ filtered_data <- Americas %>%
 ##### Merging the IDs with the filtered data set #######################
 filtered_with_samples = data.frame(Americas$Number,
                                    Americas$Population, filtered_data)
-
 
 ######################################### Calculating VST ################################################################################################
 Seq1 = filtered_with_samples %>% dplyr::filter(Americas.Population == "QC_H")
@@ -170,7 +163,6 @@ p <- ggplot(don_no_m, aes(x=STARTcum, y=VST, label=Gene)) +
     panel.background = element_rect(fill = "white", color="white"),  legend.key = element_rect(fill = "white"), plot.title=element_text( size = 15), axis.title.y = element_text( size = 12),
     axis.title.x = element_text( size = 12), axis.text.y = element_text(colour = "black"), axis.text.x = element_text(color = "black"))
 
-p
 pdf(file = "Quechua_Highland_Maya.pdf", width = 12, height =4)
 print(p)
 dev.off()
