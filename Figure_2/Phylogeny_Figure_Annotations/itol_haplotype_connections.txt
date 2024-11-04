@@ -1,0 +1,26 @@
+DATASET_CONNECTION
+SEPARATOR TAB
+DATASET_LABEL	example connections
+COLOR	#ff0ff0
+
+#if set to 1, arrows will be drawn on the destination end of each connection line
+DRAW_ARROWS	0
+CENTER_CURVES	1
+
+#when arrows are displayed, this option sets their size
+ARROW_SIZE	20
+
+#maximum width specified in the dataset will be drawn with this value. All other widths will be scaled down proportionally.
+MAXIMUM_LINE_WIDTH	10
+
+#Angle can be any value between -80 and 80. With angle set to 0 lines will be straight.
+CURVE_ANGLE	45
+
+DATA
+CNS0261886_20.26_Andean_hap1	CNS0261886_20.26_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+108351_16.25_Andean_hap1	108351_16.25_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+108370_16.2_Andean_hap1	108370_16.2_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+CNS0261885_14.9_Andean_hap1	CNS0261885_14.9_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+108349_14.25_Andean_hap1	108349_14.25_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+108310_14_Andean_hap1	108310_14_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
+108369_13.75_Andean_hap1	108369_13.75_Andean_hap2	10	#D4AA0080	dashed	haplotype connection
