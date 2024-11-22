@@ -87,31 +87,8 @@ done
 echo "Filtering completed for all BAM files."
 
 ########################Calculating read depth for the filtered bam files:
-# Loop through all filtered BAM files in *_hap1 and *_hap2 directories
-for bam in *_hap1/filtered_*.bam *_hap2/filtered_*.bam; do
-    # Get the directory of the current BAM file
-    dir=$(dirname "${bam}")
-    # Get the base name of the BAM file without the extension
-    sample=$(basename "${bam}" .bam)
-    
-    echo "Calculating read depth for ${sample}..."
+#!/bin/bash
 
-    # Define the output file paths in the same directory
-    depth_file="${dir}/${sample}_depth.txt"
-    depth_values_file="${dir}/${sample}_depth_values.txt"
-    
-    # Calculate read depth and save to a file in the same directory
-    samtools depth -a "${bam}" > "${depth_file}"
-    
-    # Extract only the depth values (3rd column) and save to another file in the same directory
-    awk '{print $3}' "${depth_file}" > "${depth_values_file}"
-
-    echo "Depth values saved for ${sample} in ${dir}."
-done
-
-echo "Read depth calculation completed for all filtered BAM files."
-
-############# Getting mean and SD for the readdepth files for each haplotype
 # Enable nullglob to handle cases where no files match the pattern
 shopt -s nullglob
 
@@ -170,4 +147,3 @@ done
 echo "Mean read depth and standard deviation calculated for all haplotypes."
 echo "Results saved in ${output_file}."
 
-####################### Standardize across haplotypes
