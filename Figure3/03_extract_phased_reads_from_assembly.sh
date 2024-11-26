@@ -1,4 +1,9 @@
 #!/bin/bash
+
+#This script maps the contigs to the reference genome hg38. Then, it gets the coordinates for the region of interest (AMY region), 
+#and extracts the reads that make up those contigs. Because hifiasm phased the contigs based on the trios, this is a way of getting the 
+#phased reads for the amylase region. The contigs were manually checked to make sure they are encompassing the amy region (please see dotplots).
+
 ######## INPUTS
 reads="/projects/academic/omergokc/Luane/HG01946/herro/HG01946_10kbp_HERRO.fasta" #path to corrected reads
 raw_reads="/projects/academic/omergokc/Luane/HG01946/HG01946_allreads_Apr16.fastq" #path to raw reads
