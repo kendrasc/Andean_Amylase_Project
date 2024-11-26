@@ -1,20 +1,4 @@
-#Still have to edit this
-
-
 #!/bin/bash
-#SBATCH --account=omergokc
-#SBATCH --partition=general-compute
-#SBATCH --qos=nih
-#SBATCH --time=3:00:00
-#SBATCH --nodes=1
-#SBATCH --mem=64000
-#SBATCH --ntasks-per-node=1
-#SBATCH --job-name="DP1922"
-#SBATCH --output=dotplots_HG01922_phased_hifiasm_50kb.out
-#SBATCH --error=dotplots_HG01922_phased_hifiasm_50kb.err
-##SBATCH --requeue
-#Specifies that the job will be requeued after a node failure.
-#The default is that the job will not be requeued.
 
 #This script uses the paf files you have generated with the dotplots scrips. 
 #The purpose is to extract certain regions of the contigs from the assembly fasta file, and
@@ -24,20 +8,15 @@
 #nucmer and mummerplot are part of this package: https://github.com/mummer4/mummer
 
 ################################################    Defining variables
-#Ref="/projects/academic/omergokc/charikleia/t2t_chr.fa"
 Ref="/projects/academic/omergokc/hg38.fa" #Reference genome to generate paf file
 Ref_cut="/projects/academic/omergokc/Luane/amy_hap/hg38_103570000-103760000.fa" #Fasta file with the region of the genome you're aiming to align to
 assembly_hap1="/projects/academic/omergokc/Luane/HG01922/hifiasm/hifiasm_diploid_ULR/HG01922_diploid_50kb.dip.hap1.p_ctg.fasta" #haplotype 1 of your assembly
 assembly_hap2="/projects/academic/omergokc/Luane/HG01922/hifiasm/hifiasm_diploid_ULR/HG01922_diploid_50kb.dip.hap2.p_ctg.fasta" #haplotype 2 of your assembly
 rn="hg38" #reference name identifier
 #rn="t2t"
-outdir="HG01922_hap1_50kb" #outdire for hap1
+outdir="HG01922_hap1_50kb" #outdir for hap1
 outdir2="HG01922_hap2_50kb" #outdir for hap2
 id="HG01922_50kb" #sample name/identifier
-
-#I am activating my conda environment, because this is where I have all the programs installed.
-eval "$(/projects/academic/omergokc/Luane/softwares/anaconda_new/bin/conda shell.bash hook)"
-conda activate herro
 
 ##################Create paf files and dotplots for entire chr and assembly##############
 mkdir -p ${outdir}
@@ -46,11 +25,8 @@ mkdir -p ${outdir2}
 minimap2 -x asm5 ${Ref} ${assembly_hap1} > ${outdir}/${rn}_vs_${id}_hap1.paf
 minimap2 -x asm5 ${Ref} ${assembly_hap2} > ${outdir2}/${rn}_vs_${id}_hap2.paf
 
-module load gcc/11.2.0 openmpi/4.1.1 r/4.2.0
-
 #to create one dotplot for the entire paf file
 /projects/academic/omergokc/Luane/softwares/paf2dotplot/paf2dotplot.r ${outdir}/${rn}_vs_${id}_hap1.paf #haplotype 1
-
 /projects/academic/omergokc/Luane/softwares/paf2dotplot/paf2dotplot.r ${outdir2}/${rn}_vs_${id}_hap2.paf #haplotype 2
 
 #only for chr1, because if not it'll be grouped with all the chr that start with 'chr1'
@@ -159,3 +135,5 @@ delta-filter -q -l 10000 amylocus_${id}_hap2_nucmer.delta > amylocus_${id}_hap2_
 module load gcc gnuplot
 mummerplot -prefix amylocus_${id}_hap2_nucmer.filter --png --large -R $Ref_cut -Q allcontigs_amylocus_nucmer.fa amylocus_${id}_hap2_nucmer.filter
 ###############################Best commands^############################################
+
+###Keep in mind that after these steps, sometimes one contig might have duplicates on the dotplots. So I manually removed the duplicates, and left only the best alignments.
