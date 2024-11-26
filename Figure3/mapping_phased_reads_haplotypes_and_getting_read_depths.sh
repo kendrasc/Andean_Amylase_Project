@@ -1,32 +1,13 @@
+#!/bin/bash
 ################################# STEP 1: MAPPING #################################
 
-#!/bin/bash
-#SBATCH --qos=omergokc
-#SBATCH --partition=omergokc
-#SBATCH --cluster=faculty
-#SBATCH --account=omergokc
-#SBATCH --time=1-00:00:00
-#SBATCH --nodes=1
-#SBATCH --ntasks-per-node=32
-#SBATCH --mem=250G
-#SBATCH --job-name=map_reads_all_haplotypes
-#SBATCH --output=map_allreads_all_haplotypes_%A_%a.out
-#SBATCH --error=map_allreads_all_haplotypes_%A_%a.err
-#SBATCH --export=NONE
-#SBATCH --mail-user=luanejan@buffalo.edu
-#SBATCH --mail-type=ALL
-#SBATCH --array=1-2 # job array index
-
 # Read the assembly name and path from the file
-line=$(sed -n "${SLURM_ARRAY_TASK_ID}p" reads.txt)
-outdir=$(echo "$line" | awk '{print $1}')
-reads_hap1=$(echo "$line" | awk '{print $2}')
-reads_hap2=$(echo "$line" | awk '{print $3}')
+line=$(sed -n "${SLURM_ARRAY_TASK_ID}p" reads.txt) #reads.txt should have the name of the sample on the first line, followed by the path to the phased reads in the next two columns.
+outdir=$(echo "$line" | awk '{print $1}') #Sample name
+reads_hap1=$(echo "$line" | awk '{print $2}') #fasta file for phased reads hap1
+reads_hap2=$(echo "$line" | awk '{print $3}') #fasta file for phased reads hap2
 
-# Load conda environment
-eval "$(/projects/academic/omergokc/Luane/softwares/anaconda_new/bin/conda shell.bash hook)"
-conda activate herro
-haplotype_dir="/projects/academic/omergokc/Luane/amy_hap/haplotypes"
+haplotype_dir="/projects/academic/omergokc/Luane/amy_hap/haplotypes" #directory with the fasta files for the reference haplotypes I am using
 THREADS=32
 
 # Create output directories
@@ -50,10 +31,7 @@ for ref in ${haplotype_dir}/*.fa*; do
     samtools index -@ ${THREADS} "${sample}_hap2/${outdir}_${outdir}_mapped.bam"
 done
 
-echo "Mapping completed for all haplotypes."
-
-
-################################# STEP 2: CALCULATING READ DEPTH ################################################
+################################# STEP 2: FILTERING BAM FILES ################################################
 #First, I am filtering for reads with alignments that are bigger than 5kb and generating filtered bam files
 for bam in *_hap1/*.bam *_hap2/*.bam; do
     # Get the directory of the current BAM file
@@ -84,16 +62,13 @@ for bam in *_hap1/*.bam *_hap2/*.bam; do
     samtools index "${filtered_bam}"
 done
 
-echo "Filtering completed for all BAM files."
-
-########################Calculating read depth for the filtered bam files:
-#!/bin/bash
-
+################################# STEP 3: CALCULATING READ DEPTH FOR THE BAM FILES ################################################
 # Enable nullglob to handle cases where no files match the pattern
 shopt -s nullglob
 
 # Define the output file
-output_file="haplotype_depth_stats.txt"
+#This will generate one txt file with all the means and SD for all samples
+output_file="haplotype_depth_stats.txt" #
 
 # Initialize the output file with a header
 echo -e "Sample\tMean_Depth\tStd_Dev\tHaplotype\tReference" > "${output_file}"
