@@ -26,4 +26,4 @@ seqkit seq -m 50000 $raw > raw_reads_${sample}_50kb.fastq
 #For haploid samples:
 
 #For Haploid samples
-./hifiasm -t 32 -o ${sample}_hifiasm_50kb --ul raw_reads_${sample}_50kb.fastq -l0 ${cor_reads}
+#./hifiasm -t 32 -o ${sample}_hifiasm_50kb --ul raw_reads_${sample}_50kb.fastq -l0 ${cor_reads}
