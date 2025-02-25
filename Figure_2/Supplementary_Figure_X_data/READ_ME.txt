@@ -1,1 +1,0 @@
-This folder contains all of the final data frames of the organized data in the code “Example_code_for_FST_by_AMY1_association_figure.R” for each population comparison done in Figure 2 and Figure X. These datasets are to be used in the creation of the figures in the final steps of said code.
