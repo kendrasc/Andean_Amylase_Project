@@ -1,92 +1,133 @@
-setwd("~/Desktop/Amylase_Americas/Andean_LD_analysis")
-library(ggplot2)
 library(dplyr)
+library(ggplot2)
+#library(ggrepel)
+#library(AnnotationHub)
+#library(ensembldb)
+library(viridis)
+library(stringr)
 
-population_names <- c("YRI","TSI", "STU", "PUR", "PJL", "PEL",
-                      "MXL", "MSL", "LWK", "KHV", "JPT", "ITU",
-                      "IBS", "GWD", "GIH", "GBR", "FIN", "ESN",
-                      "CLM", "CHS", "CHB", "CEU", "CDX", "BEB",
-                      "ASW", "ACB", "Quechua", "Maya_Chiapas")
+#################### All 1k genomes populations ########################
+modern = read.csv("~/Desktop/modern_humans_redownload.csv")
+n <- ncol(modern)
+modern <- modern[, c(1, n-1, n, 2:(n-2))]
 
-setwd("~/Desktop/Amylase_Americas/SNP_pop_significance_comparison_figure")
-GeneToCN <- read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header = TRUE)
-results_df <- data.frame(Population = character(), Min_Pvalue = numeric(), SNP_Position = character(), stringsAsFactors = FALSE)
 
-######################### Kruskal Wallis Analysis ##########################
-analyze_population <- function(population_name) {
-  
-  if (population_name == "Quechua") {
-    genotype_file <- "Quechua_no_EUR_amylase_chr1_no_indels_0.05_no_missing_unique_Genotype.txt"
-    GenetoCN_Pops <- GeneToCN %>%
-      filter(Pop %in% c("Highland_Quechua", "Lowland_Quechua")) %>%
-      filter(!ID %in% c("108333", "108337", "CNS0261883"))
-  } else if (population_name == "Maya_Chiapas") {
-    genotype_file <- "Maya_Chiapas_amylase_chr1_no_indels_0.05_no_missing_unique_Genotype.txt"
-    GenetoCN_Pops <- GeneToCN %>%
-      filter(Pop == population_name)
-  } else {
-    genotype_file <- paste0("1k_genomes_", population_name, "_amylase_chr1_no_indels_0.05_no_missing_unique_Genotype.txt")
-    GenetoCN_Pops <- GeneToCN %>%
-      filter(Pop == population_name)
+################## Protein coding genes #########################
+tbl <- as_tibble(read.csv("~/Desktop/tbl_protein_coding_genes.csv"))
+############# Pulls all genes from Human Ensembl #######################
+#hub = AnnotationHub()
+#query(hub, c("EnsDb", "Homo sapiens", "97"))
+#edb = hub[["AH73881"]]
+#keytypes(edb)
+#columns(edb)
+#keys = keys(edb, "GENENAME")
+#columns =  c("GENEID", "ENTREZID", "GENEBIOTYPE")
+#tbl =
+#  ensembldb::select(edb, keys, columns, keytype = "GENENAME") %>%
+#  as_tibble()
+
+################ This is filtering out the amy genes that have bigger values = fix here
+######### Pull Only Protein Coding Genes (23069) #######################
+#supportedFilters()
+#filter = ~ gene_name %in% keys & gene_biotype == "protein_coding"
+#tbl =
+#  ensembldb::select(edb, filter, columns) %>%
+#  as_tibble()
+
+#write.csv(tbl, "~/Desktop/tbl_protein_coding_genes.csv", row.names = FALSE)
+
+
+######################################### Calculating VST ################################################################################################
+Seq1 = modern %>% dplyr::filter(pop == "PEL")
+Seq2 = modern %>% dplyr::filter(pop == "MXL")
+test_combined_vst = rbind(Seq1, Seq2)
+
+getVst <- function(data) {
+  if ((max(data) - min(data)) > 1){
+    dat1 <- data[1:(length(Seq1$pop))]
+    dat2 <- data[(length(Seq1$pop)+1):(length(Seq1$pop) + (length(Seq2$pop)))]
+    Vtotal <- var(c(dat1,dat2))
+    Vgroup <- ((var(dat1) * (length(dat1)-1)) + (var(dat2) * (length(dat2)-1))) /
+      ((length(dat1)-1) + (length(dat2)-1))
+    Vst <- c((Vtotal-Vgroup) / Vtotal)
+    if (Vst < 0) {
+      Vst = 0
+    }
+    return(Vst)
   }
-  
-  Genotype <- read.delim(genotype_file, header = TRUE) %>%
-    select(-CHROM) %>%
-    mutate(POS = paste0("X", POS))
-  rownames(Genotype) <- Genotype$POS
-  
-  Genotype_transposed <- as.data.frame(t(Genotype[,-1])) %>%
-    `colnames<-`(Genotype$POS) %>%
-    mutate(ID = rownames(.)) %>%
-    select(ID, everything())
-  Genotype_transposed$ID <- sub(".*_", "", Genotype_transposed$ID)
-  
-  GenetoCN_Pops_sorted <- GenetoCN_Pops[order(GenetoCN_Pops$ID), ]
-  Genotype_sorted <- Genotype_transposed[order(Genotype_transposed$ID), ]
-  dataset_for_snp_analyses <- cbind(GenetoCN_Pops_sorted, Genotype_sorted[, -1])
-  
-  snp_data <- dataset_for_snp_analyses[, 6:ncol(dataset_for_snp_analyses)]
-  dataset_for_snp_analyses[6:ncol(dataset_for_snp_analyses)] <- lapply(
-    snp_data,
-    function(x) factor(
-      ifelse(x == "0|0", "Homozygous Ancestral",
-             ifelse(x == "1|1", "Homozygous Derived", "Heterozygous")),
-      levels = c("Homozygous Ancestral", "Heterozygous", "Homozygous Derived")
-    )
-  )
-  
-  AMY1_data <- dataset_for_snp_analyses$AMY1
-  Kruskal_pvalue <- vapply(snp_data, function(snp) {
-    kruskal.test(AMY1_data ~ snp)$p.value
-  }, numeric(1))
-  
-  min_pvalue <- max(-log10(Kruskal_pvalue))
-  min_snp_position <- names(Kruskal_pvalue)[which.max(-log10(Kruskal_pvalue))]
-  
-  cat("Minimum p-value for", population_name, ":", min_pvalue, 
-      "at", min_snp_position, "\n\n")
-  results_df <<- rbind(results_df, data.frame(Population = population_name, Min_Pvalue = min_pvalue, SNP_Position = min_snp_position))
+  else{
+    Vst = 0
+  }
 }
-lapply(population_names, analyze_population)
 
-###################### Results from LD analysis ###################
-onek_genomes_LD = read.delim("~/Desktop/Amylase_Americas/Andean_LD_analysis/Flanking_1k_genomes_flanking_results.txt")
+full_dataset = as.data.frame(apply(test_combined_vst[4:ncol(test_combined_vst)],2, getVst))
+full_dataset$Gene = row.names(full_dataset)
+rownames(full_dataset) <- NULL
+colnames(full_dataset) = c("VST", "Gene")
 
-sorted_snps = results_df[order(results_df$Population),]
-sorted_onek_genomes = onek_genomes_LD[order(onek_genomes_LD$Pop),]
+######################################### Calculate Medians #############################
+Seq1_median = apply(Seq1[4:ncol(test_combined_vst)], 2, median)
+Seq2_median = apply(Seq2[4:ncol(test_combined_vst)], 2, median)
+median_across = as.data.frame(abs(Seq1_median - Seq2_median))
+median_across$Gene = row.names(median_across)
+rownames(median_across) <- NULL
+colnames(median_across) = c("Medians", "Gene")
 
-sorted_onek_genomes$Min_Pvalue = sorted_snps$Min_Pvalue
-sorted_onek_genomes$SNP_Position = sorted_snps$sorted_onek_genomes
+full_dataset$Medians = median_across$Medians
+######################################### Filter only the Top VST Hits ##############################
+full_dataset$Gene <- sub("\\..*", "", full_dataset$Gene)
 
-file = ggplot(sorted_onek_genomes, aes(x = Min_Pvalue, y = Across, color = Region)) +
-  geom_point(size = 4) +
-  ylab("Average LD Across Chr1: 103343023-103959885") +
-  xlab("Top Significantly Associated SNP with AMY1 Copy Number") +
-  scale_color_manual(values = c("AFR" = "#cd1076bf", "EAS" = "#ffaaeebf", "AMR" = "#ffcc00bf",
-                                "EUR" = "#ff6600bf", "SAS" = "#8b4726bf")) +
-  theme_minimal()
+# Perform the inner join between full_dataset and tbl based on Gene and GENENAME
+filtered_dataset <- full_dataset %>%
+  inner_join(tbl, by = c("Gene" = "GENENAME"), relationship = "many-to-many") %>%
+  group_by(Gene) %>%
+  # For each Gene, keep only the row with the largest VST value
+  dplyr::filter(VST == max(VST)) %>%
+  ungroup() %>%
+  distinct(Gene, .keep_all = TRUE)
 
+######################################### VST Figure #####################################################################################################
+locations = read.delim("~/Desktop/Stuff_on_Desktop/Gene_CNVs/locations_please_work.txt", header = T)
 
-pdf(file = "~/Desktop/Andean_Amylase_PDFs/Figure_S2.pdf", width = 8, height = 6)
-print(file)
+# file to get unique locations --> Choosing the first location
+locations_unique = locations %>%
+  dplyr::distinct(across(Gene),
+                  .keep_all = TRUE)
+
+locations_adjusted = locations_unique[locations_unique$Gene %in% filtered_dataset$Gene,]
+locations_adjusted_sorted <- locations_adjusted[order(locations_adjusted$Gene),]
+filtered_dataset_sorted <- filtered_dataset[order(filtered_dataset$Gene),]
+
+############################### Filter out usually high copy numbered genes/clear errors #############
+Outlier_removed <- filtered_dataset_sorted %>%
+  dplyr::filter(
+    Medians != 0 &
+      VST != 0 &
+      !str_detect(Gene, "USP17L") &
+      !str_detect(Gene, "NBPF") &
+      Gene != "MTRNR2L8" &
+      !str_detect(Gene, "DUX4")
+  )
+
+Outlier_removed$combined_metric <- Outlier_removed$Medians * Outlier_removed$VST
+
+PEL = ggplot(Outlier_removed, aes(x = Medians, y = VST, color = combined_metric)) +
+  geom_point(size = 3) +
+  scale_color_gradientn(
+    colors = rev(viridis(256, option = "inferno")), # Reverses the color order
+    limits = c(0, 1),
+    oob = scales::squish) +
+  ylim(0, 0.35) +
+  xlim(0, 11) +
+  xlab("Median Gene Copy Number Difference") + 
+  ylab("VST") + 
+  ggtitle("PEL vs. MXL") + 
+  labs(color = " VST x Median") +
+  theme_minimal() +
+  theme(legend.position = "bottom")
+
+write.csv(Outlier_removed, "~/Desktop/Amylase_Americas/CSVs/PEL_vs_MXL_VST_positive_VST_values_fixed_medians.csv")
+
+pdf(file = "~/Desktop/Amylase_Americas/PDFs/PEL_MXL_median_VST.pdf", width = 8, height = 4.5)
+print(PEL)
 dev.off()
