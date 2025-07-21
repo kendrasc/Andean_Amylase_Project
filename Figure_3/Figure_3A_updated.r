@@ -4,27 +4,28 @@ library(ggpubr)
 library(forcats)
 library(FSA)
 
-setwd("~/Desktop/Amylase_Americas/Testing_LD_error/")
+setwd("~/Desktop/Amylase_Americas/")
 
-# Removed the last position from FST b/c part of another haplotype and for some reason, while it says it is being used in the log file, it doesn't appear in the LD analysis
+# There are many saves within this code since the script kept crashing/having issues while I was writing it
+
 FST = read.delim("Quechua_Missing_EUR_in_amylase_Maya_all_chr1_biallelic_0.05_1_region_fst.txt", header = T)
-Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreate.txt", header = T)
-GeneToCN = read.delim("All_Amylase_I_think.txt", header = T)
+Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreated.txt", header = T)
+GeneToCN = read.delim("All_amylase_gene_copy_number.txt", header = T)
 
-Genotype <- subset(Genotype, select = -CHROM)
-Genotype <- Genotype %>%
+Genotype = subset(Genotype, select = -CHROM)
+Genotype = Genotype %>%
   mutate(POS = paste0("X", POS))
 rownames(Genotype) = Genotype$POS
-Genotype_transposed <- as.data.frame(t(Genotype[,-1])) 
-colnames(Genotype_transposed) <- Genotype$POS
-Genotype_transposed$ID <- rownames(Genotype_transposed) 
-rownames(Genotype_transposed) <- NULL
-Genotype_transposed <- Genotype_transposed %>%
+Genotype_transposed = as.data.frame(t(Genotype[,-1])) 
+colnames(Genotype_transposed) = Genotype$POS
+Genotype_transposed$ID = rownames(Genotype_transposed) 
+rownames(Genotype_transposed) = NULL
+Genotype_transposed = Genotype_transposed %>%
   select(ID, everything())
 
 saveRDS(Genotype_transposed, "AMR_chr1_snps_Quechua_Maya_reordered.rds")
 
-GenetoCN_Pops <- GeneToCN %>%
+GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
   dplyr::filter(ID != "CNS0261883" & ID != "108337" & ID != "108333") %>%
   dplyr::mutate(Pop = dplyr::case_when(
@@ -35,15 +36,14 @@ GenetoCN_Pops <- GeneToCN %>%
 ################################# SNP by Gene Copy Number ###############################
 GenetoCN_Pops_sorted = GenetoCN_Pops[order(GenetoCN_Pops$ID),]
 
-Genotype_transposed <- Genotype_transposed %>% 
+Genotype_transposed = Genotype_transposed %>% 
   mutate(ID_short = sub(".*_", "", ID)) %>% 
   select(ID_short, everything())
 
 Genotype_sorted = Genotype_transposed[order(Genotype_transposed$ID_short),]
-dataset_for_snp_analyses <- cbind(GenetoCN_Pops_sorted, Genotype_sorted[, -1])
+dataset_for_snp_analyses = cbind(GenetoCN_Pops_sorted, Genotype_sorted[, -1])
 
-# Relabel SNP genotypes and save
-dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] <- lapply(
+dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] = lapply(
   dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)],
   function(x) factor(ifelse(x == "0|0", "Homozygous Ancestral",
                             ifelse(x == "1|1", "Homozygous Derived", "Heterozygous")),
@@ -51,33 +51,28 @@ dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] <- lapply(
 )
 
 saveRDS(dataset_for_snp_analyses, "AMR_chr1_snps_Quechua_Maya_reordered_with_copy_number.rds")
-dataset_for_snp_analyses = readRDS("AMR_chr1_snps_Quechua_Maya_reordered_with_copy_number.rds")
 dataset_for_snp_analyses$AMY1 = round(dataset_for_snp_analyses$AMY1)
 
-Quechua_indices <- dataset_for_snp_analyses[[2]] == "Quechua"
-Maya_indices <- dataset_for_snp_analyses[[2]] == "Maya_Chiapas"
-Quechua <- dataset_for_snp_analyses[Quechua_indices, ]
-Maya <- dataset_for_snp_analyses[Maya_indices, ]
+Quechua_indices = dataset_for_snp_analyses[[2]] == "Quechua"
+Maya_indices = dataset_for_snp_analyses[[2]] == "Maya_Chiapas"
+Quechua = dataset_for_snp_analyses[Quechua_indices, ]
+Maya = dataset_for_snp_analyses[Maya_indices, ]
 
-# Apply the Kruskal-Wallis test across the columns and extract p-values 
-AMY1_data <- dataset_for_snp_analyses$AMY1
-snp_data <- dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)]
+AMY1_data = dataset_for_snp_analyses$AMY1
+snp_data = dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)]
 
-Kruskal_pvalue <- vapply(snp_data, function(snp) {
+Kruskal_pvalue = vapply(snp_data, function(snp) {
   kruskal.test(AMY1_data ~ snp)$p.value
 }, numeric(1))
 
 saveRDS(Kruskal_pvalue, "AMR_chr1_snps_Quechua_Maya_Kruskal_pvalue.rds")
-Kruskal_pvalue = readRDS("AMR_chr1_snps_Quechua_Maya_Kruskal_pvalue.rds")
 
-KW_adj <- p.adjust(Kruskal_pvalue, method = "bonferroni") 
+KW_adj = p.adjust(Kruskal_pvalue, method = "bonferroni") 
 write.csv(KW_adj, "Kruskal_Wallis_Bonferroni_adjusted_p_values.csv")
 
+sig_snps = names(KW_adj)[KW_adj < 0.05]
 
-KW_adj["X104413144"]
-sig_snps <- names(KW_adj)[KW_adj < 0.05]
-
-dunn_list <- lapply(sig_snps, function(snp) {
+dunn_list = lapply(sig_snps, function(snp) {
   res <- dunnTest(AMY1_data ~ dataset_for_snp_analyses[[snp]],
                   method = "bonferroni")$res
   cbind(SNP = snp,
@@ -85,30 +80,24 @@ dunn_list <- lapply(sig_snps, function(snp) {
         res)
 })
 
-dunn_results <- do.call(rbind, dunn_list)   # data-frame with all pairs
-rownames(dunn_results) <- NULL   
-
-
+dunn_results = do.call(rbind, dunn_list)
+rownames(dunn_results) = NULL   
 write.csv(dunn_results, "Dunn_test_Quechua_Maya_results.csv")
 
-# Optionally convert to a numeric vector if necessary
-Kruskal_pvalue <- as.numeric(Kruskal_pvalue)
+Kruskal_pvalue = as.numeric(Kruskal_pvalue)
 
 ##################### X axis #######################
 Kruskal_Wallis_status = numeric()
-Kruskal_Wallis_status <- sapply(dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)], function(col) {
+Kruskal_Wallis_status = sapply(dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)], function(col) {
   
-  # Filter values in gene copy number column based on current column
-  Hets <- dataset_for_snp_analyses[[3]][col == "Heterozygous"]
-  Ancestral <- dataset_for_snp_analyses[[3]][col == "Homozygous Ancestral"]
-  Derived <- dataset_for_snp_analyses[[3]][col == "Homozygous Derived"]
+  Hets = dataset_for_snp_analyses[[3]][col == "Heterozygous"]
+  Ancestral = dataset_for_snp_analyses[[3]][col == "Homozygous Ancestral"]
+  Derived = dataset_for_snp_analyses[[3]][col == "Homozygous Derived"]
   
-  # Calculate medians for the filtered groups, handling empty groups
-  Het_median <- if (length(Hets) > 0) median(Hets) else NA
-  Ancestral_median <- if (length(Ancestral) > 0) median(Ancestral) else NA
-  Derived_median <- if (length(Derived) > 0) median(Derived) else NA
+  Het_median = if (length(Hets) > 0) median(Hets) else NA
+  Ancestral_median = if (length(Ancestral) > 0) median(Ancestral) else NA
+  Derived_median = if (length(Derived) > 0) median(Derived) else NA
   
-  # DeMayae conditions based on medians, ensuring no NA values in comparisons
   if (!is.na(Derived_median) && !is.na(Het_median) && !is.na(Ancestral_median)) {
     condition_pos_met <- Derived_median > Het_median && Het_median > Ancestral_median
     condition_neg_met <- Derived_median < Het_median && Het_median < Ancestral_median
@@ -123,11 +112,9 @@ Kruskal_Wallis_status <- sapply(dataset_for_snp_analyses[, 9:length(dataset_for_
     condition_neg_met <- Derived_median < Ancestral_median
   }
   else {
-    # If any median is NA, no valid comparison can be made
     return(0)
   }
   
-  # Return value based on conditions
   if (condition_pos_met) {
     return(1)
   } else if (condition_neg_met) {
@@ -138,7 +125,6 @@ Kruskal_Wallis_status <- sapply(dataset_for_snp_analyses[, 9:length(dataset_for_
 })
 
 saveRDS(Kruskal_Wallis_status, "AMR_chr1_snps_Quechua_Maya_Kruskal_Wallis_status.rds")
-Kruskal_Wallis_status = readRDS("AMR_chr1_snps_Quechua_Maya_Kruskal_Wallis_status.rds")
 ##################### Y axis testing #######################
 library(data.table)
 
