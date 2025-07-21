@@ -115,21 +115,7 @@ new_world <- ggplot() +
     legend.background = element_rect(fill = "#ffffff", color = NA)
   )
 
-new_world
 
 pdf(file = "~/Desktop/Amylase_Americas/PDFs/Figure_1B-C.pdf", width = 14, height = 8)
 print(new_world)
-dev.off()
-
-
-test = genetocn %>%
-  dplyr::filter(!Pop %in% AMR_peru_pima ) %>%
-ggplot(., aes(x = Greater_Region, y = AMY1_rounded, color = Pop)) +
-  geom_boxplot() +
-  stat_compare_means() +
-  theme_minimal() +
-  theme( legend.position = "none")
-
-pdf("~/Desktop/Amylase_Americas/PDFs/world_genetocn_kruskal_wallis.pdf", width = 15, height = 5)
-print(test)
 dev.off()
