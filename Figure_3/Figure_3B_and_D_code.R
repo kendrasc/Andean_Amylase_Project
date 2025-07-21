@@ -3,7 +3,7 @@ library(dplyr)
 library(ggpubr)
 
 
-setwd("~/Desktop/Amylase_Americas/Testing_LD_error/")
+setwd("~/Desktop/Amylase_Americas/")
 Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreate.txt", header = T)
 GeneToCN = read.delim("All_Amylase_I_think.txt", header = T)
 
