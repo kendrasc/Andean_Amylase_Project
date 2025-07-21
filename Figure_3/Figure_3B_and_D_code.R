@@ -24,7 +24,6 @@ Genotype_transposed = Genotype_transposed %>%
 GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
-  dplyr::filter(ID != "CNS0261883" & ID != "108337" & ID != "108333") %>%
 # Above samples are removed because they have 100% non-American ancestry in the amylase locus
   dplyr::mutate(Pop = dplyr::case_when(
     Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua",
