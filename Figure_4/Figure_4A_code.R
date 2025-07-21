@@ -2,19 +2,15 @@
 library(ggplot2)
 library(dplyr)
 
-############## Selscan Normalized
-selscan_xpehh_test_norm = read.delim("/Users/panda_bear/Desktop/Amylase_Americas/IHS/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
-head(selscan_xpehh_test_norm)
+selscan_xpehh_test_norm = read.delim("~/Desktop/Amylase_Americas/IHS/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
 
-# Replace NA values with 0
-selscan_xpehh_test_norm$normxpehh_no_na <- selscan_xpehh_test_norm$normxpehh
-selscan_xpehh_test_norm$normxpehh_no_na[is.na(selscan_xpehh_test_norm$normxpehh_no_na)] <- 0
+selscan_xpehh_test_norm$normxpehh_no_na = selscan_xpehh_test_norm$normxpehh
+selscan_xpehh_test_norm$normxpehh_no_na[is.na(selscan_xpehh_test_norm$normxpehh_no_na)] = 0
 
-# Compute the 99th percentile threshold
-threshold_selscan_norm <- quantile(abs(selscan_xpehh_test_norm$normxpehh_no_na), 0.99)
-selscan_xpehh_test_norm$in_99th_percentile <- ifelse(abs(selscan_xpehh_test_norm$normxpehh_no_na) >= threshold_selscan_norm, "yes", "no")
+threshold_selscan_norm = quantile(abs(selscan_xpehh_test_norm$normxpehh_no_na), 0.99)
+selscan_xpehh_test_norm$in_99th_percentile = ifelse(abs(selscan_xpehh_test_norm$normxpehh_no_na) >= threshold_selscan_norm, "yes", "no")
 
-test_selscan_norm = selscan_xpehh_test_norm %>%
+selscan_norm = selscan_xpehh_test_norm %>%
   dplyr::filter(pos > 103000000 & pos < 104300000) %>%
   ggplot(aes(pos, normxpehh_no_na, color = in_99th_percentile, alpha = 0.5)) + 
   theme_minimal() +
@@ -34,5 +30,5 @@ test_selscan_norm = selscan_xpehh_test_norm %>%
   ggtitle("XP-EHH in Selscan Normalized")
 
 pdf("~/Desktop/Amylase_Americas/selscan_norm_wagh_correct_positions.pdf", width = 6, height = 5)
-print(test_selscan_norm)
+print(selscan_norm)
 dev.off()
