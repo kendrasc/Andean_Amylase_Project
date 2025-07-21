@@ -42,8 +42,6 @@ geom_vline(xintercept = seq(1, 21, by = 2), linetype = "dashed") +
     strip.background = element_rect(fill = "white", color = "white")) + 
   ggtitle("") 
 
-print(Americas)
-
 pdf("~/Desktop/Amylase_Americas/PDFs/genetocn_amy1_AMR_rounded_histogram.pdf", height = 10, width = 8)
 Americas
 dev.off()
