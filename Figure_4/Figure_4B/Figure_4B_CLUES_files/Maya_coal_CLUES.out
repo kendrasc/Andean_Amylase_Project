@@ -1,0 +1,14 @@
+Loading data and initializing model...
+(100, 11) (100, 83)
+Optimizing likelihood surface using Nelder-Mead...
+	(Importance sampling with M = 100 Relate samples)
+
+##########
+
+logLR: 1.5293
+
+MLE:
+========
+epoch	selection
+0-1000	0.00928
+0
