@@ -16,11 +16,9 @@ file_name="${gene}_region_${chrm}"
 for sample in `bcftools query -l $file`; do
    bcftools view -Oz -s $sample $file -o ${gene}_region/${file_name}_${sample}.vcf.gz
 
- #Use awk to find the matching sample_id and extract Copy_number and Population
     Copy_number=$(awk -v id="$sample" '$1 == id {print $2}' $info_file)
     Population=$(awk -v id="$sample" '$1 == id {print $3}' $info_file)
     
-        # remove the sites that are the same as the reference
     gatk IndexFeatureFile \
     -I ${gene}_region/${file_name}_${sample}.vcf.gz
 
@@ -31,18 +29,12 @@ for sample in `bcftools query -l $file`; do
     --exclude-non-variants true \
     --O ${gene}_region/${file_name}_${sample}_excluded_nonvariants.vcf.gz
 
-        # For haplotype 1
     samtools faidx chr1_hg38.fasta ${location1} | bcftools consensus -H 1 ${gene}_region/${file_name}_${sample}_excluded_nonvariants.vcf.gz > ${gene}_region/${sample}_region_hap1.fasta
-
-    # For haplotype 2
     samtools faidx chr1_hg38.fasta ${location1} | bcftools consensus -H 2 ${gene}_region/${file_name}_${sample}_excluded_nonvariants.vcf.gz > ${gene}_region/${sample}_region_hap2.fasta
 
-    # Ensure the variables are correctly formatted
     formatted_label=$(printf "%s_%s_%s_hap1" "$sample_id" "$Copy_number" "$Population")
-    # Relabel the header in each FASTA file for haplotype 1
     sed -e 's/\r//g' -e "s/^>.*/>${formatted_label}/" ${gene}_region/${sample_id}_region_hap1_${test}.fasta > ${gene}_region/${sample_id}_region_relabelled_hap1_${test}.fasta
 
-    # For haplotype 2
     formatted_label=$(printf "%s_%s_%s_hap2" "$sample_id" "$Copy_number" "$Population")
     sed -e 's/\r//g' -e "s/^>.*/>${formatted_label}/" ${gene}_region/${sample_id}_region_hap2_${test}.fasta > ${gene}_region/${sample_id}_region_relabelled_hap2_${test}.fasta
 
