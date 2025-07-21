@@ -2,7 +2,7 @@
 library(ggplot2)
 library(dplyr)
 
-selscan_xpehh_test_norm = read.delim("~/Desktop/Amylase_Americas/IHS/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
+selscan_xpehh_test_norm = read.delim("~/Desktop/Amylase_Americas/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
 
 selscan_xpehh_test_norm$normxpehh_no_na = selscan_xpehh_test_norm$normxpehh
 selscan_xpehh_test_norm$normxpehh_no_na[is.na(selscan_xpehh_test_norm$normxpehh_no_na)] = 0
