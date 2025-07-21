@@ -29,7 +29,6 @@ saveRDS(Genotype_transposed, "AMR_chr1_snps_Quechua_Maya_reordered.rds")
 
 GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
-  dplyr::filter(ID != "CNS0261883" & ID != "108337" & ID != "108333") %>%
   dplyr::mutate(Pop = dplyr::case_when(
     Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua",
     TRUE ~ Pop
