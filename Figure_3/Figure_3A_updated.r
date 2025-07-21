@@ -3,10 +3,12 @@ library(dplyr)
 library(ggpubr)
 library(forcats)
 library(FSA)
+library(data.table)
 
 setwd("~/Desktop/Amylase_Americas/")
 
 # There are many saves within this code since the script kept crashing/having issues while I was writing it
+# This code could also probably be a lot cleaner but I'm mostly just meh at coding...
 
 FST = read.delim("Quechua_Missing_EUR_in_amylase_Maya_all_chr1_biallelic_0.05_1_region_fst.txt", header = T)
 Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreated.txt", header = T)
@@ -125,55 +127,44 @@ Kruskal_Wallis_status = sapply(dataset_for_snp_analyses[, 9:length(dataset_for_s
 })
 
 saveRDS(Kruskal_Wallis_status, "AMR_chr1_snps_Quechua_Maya_Kruskal_Wallis_status.rds")
+
 ##################### Y axis testing #######################
-library(data.table)
+Quechua = as.data.table(Quechua)
+Maya = as.data.table(Maya)
 
-# Convert data frames to data.table for faster column access
-Quechua <- as.data.table(Quechua)
-Maya <- as.data.table(Maya)
-
-######## can I shorten this to be "snp_data rather than get the length each time?"
-# Initialize FST_status
-FST_status <- sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_analyses)], function(col_name) {
+FST_status = sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_analyses)], function(col_name) {
   
-  # Extract columns once
-  col_Quechua <- Quechua[[col_name]]
-  col_Maya <- Maya[[col_name]]
+  col_Quechua = Quechua[[col_name]]
+  col_Maya = Maya[[col_name]]
   
-  # Use table() to count all values at once
-  count_Quechua <- table(factor(col_Quechua, levels = c("Heterozygous", "Homozygous Ancestral", "Homozygous Derived")))
-  count_Maya <- table(factor(col_Maya, levels = c("Heterozygous", "Homozygous Ancestral", "Homozygous Derived")))
+  count_Quechua = table(factor(col_Quechua, levels = c("Heterozygous", "Homozygous Ancestral", "Homozygous Derived")))
+  count_Maya = table(factor(col_Maya, levels = c("Heterozygous", "Homozygous Ancestral", "Homozygous Derived")))
   
-  # Extract counts
-  Hets_Quechua <- count_Quechua["Heterozygous"]
-  Ancestral_Quechua <- count_Quechua["Homozygous Ancestral"]
-  Derived_Quechua <- count_Quechua["Homozygous Derived"]
+  Hets_Quechua = count_Quechua["Heterozygous"]
+  Ancestral_Quechua = count_Quechua["Homozygous Ancestral"]
+  Derived_Quechua = count_Quechua["Homozygous Derived"]
   
-  Hets_Maya <- count_Maya["Heterozygous"]
-  Ancestral_Maya <- count_Maya["Homozygous Ancestral"]
-  Derived_Maya <- count_Maya["Homozygous Derived"]
+  Hets_Maya = count_Maya["Heterozygous"]
+  Ancestral_Maya = count_Maya["Homozygous Ancestral"]
+  Derived_Maya = count_Maya["Homozygous Derived"]
   
-  # Replace NAs with 0 for count values
-  Hets_Quechua <- ifelse(is.na(Hets_Quechua), 0, Hets_Quechua)
-  Ancestral_Quechua <- ifelse(is.na(Ancestral_Quechua), 0, Ancestral_Quechua)
-  Derived_Quechua <- ifelse(is.na(Derived_Quechua), 0, Derived_Quechua)
+  Hets_Quechua = ifelse(is.na(Hets_Quechua), 0, Hets_Quechua)
+  Ancestral_Quechua = ifelse(is.na(Ancestral_Quechua), 0, Ancestral_Quechua)
+  Derived_Quechua = ifelse(is.na(Derived_Quechua), 0, Derived_Quechua)
   
-  Hets_Maya <- ifelse(is.na(Hets_Maya), 0, Hets_Maya)
-  Ancestral_Maya <- ifelse(is.na(Ancestral_Maya), 0, Ancestral_Maya)
-  Derived_Maya <- ifelse(is.na(Derived_Maya), 0, Derived_Maya)
+  Hets_Maya = ifelse(is.na(Hets_Maya), 0, Hets_Maya)
+  Ancestral_Maya = ifelse(is.na(Ancestral_Maya), 0, Ancestral_Maya)
+  Derived_Maya = ifelse(is.na(Derived_Maya), 0, Derived_Maya)
   
-  # Calculate ancestral frequencies
-  total_Quechua <- Hets_Quechua + Ancestral_Quechua + Derived_Quechua
-  total_Maya <- Hets_Maya + Ancestral_Maya + Derived_Maya
+  total_Quechua = Hets_Quechua + Ancestral_Quechua + Derived_Quechua
+  total_Maya = Hets_Maya + Ancestral_Maya + Derived_Maya
   
   if (total_Quechua == 0 || total_Maya == 0) {
-    return(0) # Prevent division by zero if no data is available
-  }
+    return(0)}
   
-  Frequency_Quechua_ancestral <- (Hets_Quechua + 2 * Derived_Quechua) / (2 * total_Quechua)
-  Frequency_Maya_ancestral <- (Hets_Maya + 2 * Derived_Maya) / (2 * total_Maya)
+  Frequency_Quechua_ancestral = (Hets_Quechua + 2 * Derived_Quechua) / (2 * total_Quechua)
+  Frequency_Maya_ancestral = (Hets_Maya + 2 * Derived_Maya) / (2 * total_Maya)
   
-  # Determine FST status
   if (Frequency_Quechua_ancestral > Frequency_Maya_ancestral) {
     1
   } else if (Frequency_Maya_ancestral > Frequency_Quechua_ancestral) {
@@ -185,10 +176,9 @@ FST_status <- sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_an
 
 
 saveRDS(FST_status, "AMR_chr1_snps_Quechua_Maya_FST_status.rds")
-FST_status = readRDS("AMR_chr1_snps_Quechua_Maya_FST_status.rds")
 
 ###################### P-value by FST graph #######################
-FST$WEIR_AND_COCKERHAM_FST[FST$WEIR_AND_COCKERHAM_FST < 0] <- 0
+FST$WEIR_AND_COCKERHAM_FST[FST$WEIR_AND_COCKERHAM_FST < 0] = 0
 FST_directional = FST$WEIR_AND_COCKERHAM_FST*FST_status
 Kruskal_Wallis_status = as.numeric(unlist(Kruskal_Wallis_status))
 Krusal_pvalue_directional = (-log10(Kruskal_pvalue)*Kruskal_Wallis_status)
@@ -200,7 +190,7 @@ m = length(Kruskal_pvalue)
 bonf_t = -log10(0.01 / m)
 fst_cut = quantile(abs(FST_directional), 0.99, na.rm = TRUE)
 
-FST_by_KW_test_no_zero <- FST_by_KW_test[ !(FST_by_KW_test$Krusal_pvalue_directional == 0 & FST_by_KW_test$FST_directional == 0) , ]
+FST_by_KW_test_no_zero = FST_by_KW_test[ !(FST_by_KW_test$Krusal_pvalue_directional == 0 & FST_by_KW_test$FST_directional == 0) , ]
 figure = ggplot(FST_by_KW_test_no_zero, aes(x = Krusal_pvalue_directional, y = FST_directional, color = Color_the_figure)) +
   geom_point() + 
   theme_classic() +
@@ -221,8 +211,6 @@ figure = ggplot(FST_by_KW_test_no_zero, aes(x = Krusal_pvalue_directional, y = F
   ylim(-0.42, 0.42) +
   labs(color = "FST by p-value")
   ggtitle("Alternative SNV Status: Chromosome 1")
-
-figure
 
 pdf(file = "Cross_figure_Quechua_Maya.pdf", width = 10, height = 6)
 print(figure)
