@@ -4,7 +4,7 @@ library(ggplot2)
 library(forcats)
 
 ####################### GenetoCN for Amylase. #####################################################################################
-genetocn = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header=T)
+genetocn = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header=T) # pull gene copy number data
 
 ############################################################################################################
 AMR = c("Lowland_Quechua", "Highland_Quechua", "Maya_Chiapas",
@@ -12,20 +12,20 @@ AMR = c("Lowland_Quechua", "Highland_Quechua", "Maya_Chiapas",
         "Karitiana_Brazil")
 high = c("Pima_Mexico", "Lowland_Quechua", "Highland_Quechua", "PEL")
 genetocn$Copy_Number = with(genetocn,
-                            ifelse (Pop %in% high, "Yes", "No"))
+                            ifelse (Pop %in% high, "Yes", "No")) # label based on high copy number populations
 
 ########################### Create Plot ###########################
 Americas = genetocn %>%
   dplyr::filter(Pop %in% AMR) %>%
   dplyr::mutate(
     Pop = dplyr::recode(Pop, "Highland_Quechua" = "Quechua",
-                        "Lowland_Quechua" = "Quechua")) %>%
+                        "Lowland_Quechua" = "Quechua")) %>% # group Quechua populations together since shouldn't be genetically different
   dplyr::mutate(Pop= fct_relevel(Pop, "Surui_Brazil", "Karitiana_Brazil","Maya_Yucatan",
                                  "Maya_Chiapas", "MXL", "PUR", "CLM",
                                  "Pima_Mexico", "Quechua", "PEL",)) %>%
-  ggplot(., aes(x = round(AMY1), fill=Copy_Number, color=Copy_Number)) +
+  ggplot(., aes(x = round(AMY1), fill=Copy_Number, color=Copy_Number)) + # round to get integers
   facet_grid(rows = vars(Pop)) +
-geom_vline(xintercept = seq(1, 21, by = 2), linetype = "dashed") +
+geom_vline(xintercept = seq(1, 21, by = 2), linetype = "dashed") + # add lines to separate the groups more clearly
   geom_histogram(alpha = 0.5, binwidth = 1) + 
   xlab("") +
   ylab("") +
