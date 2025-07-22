@@ -3,10 +3,11 @@ library(dplyr)
 library(ggplot2)
 
 ####################### GenetoCN for Amylase. #####################################################################################
-setwd("~/Desktop/Amylase_Americas")
 genetocn = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header=T)
+# This is the main file where I kept all of the copy  number data. The values for this are in supplementary table 1
 
 ############################################################################################################
+# Geographic labels are coming from the datasets
 
 EAS = c("CDX","KHV", "JPT","Tibetans", "CHB", "CHS", "Cambodian_Cambodia", "Dai_China",
         "Daur_China", "Yi_China", "Tu_China", "Tibetan", "She_China", "Mongolian_China",
@@ -27,6 +28,7 @@ SAS = c("ITU", "GIH", "PJL", "BEB", "Balochi_Pakistan", "Brahui_Pakistan", "Buru
 Middle_East = c("Bedouin_Israel", "Druze_Israel", "Palestinian_Israel", "UAE", "IRAQ", "YEMEN", "SYRIA", "SAUDI")
 Oceania = c("Bougainville_Bougainville", "Papuan_PNG")
 
+
 genetocn$Greater_Region = with(genetocn, 
                                ifelse(Pop %in% EAS , "East Asia",
                                       ifelse(Pop %in% AFR, "Africa",
@@ -39,8 +41,8 @@ genetocn$Greater_Region = with(genetocn,
 genetocn$AMY1_rounded = round(genetocn$AMY1)
 
 figure = genetocn %>%
-  dplyr::filter(Pop != "Colombian_Colombia" & Pop != "Bantu_SA" & Pop != "San_Namibia") %>%
-  dplyr::mutate(Pop = ifelse(Pop %in% c("Highland_Quechua", "Lowland_Quechua"), "Quechua",
+  dplyr::filter(Pop != "Colombian_Colombia" & Pop != "Bantu_SA" & Pop != "San_Namibia") %>% # These samples are filtered out for having too few individuals
+  dplyr::mutate(Pop = ifelse(Pop %in% c("Highland_Quechua", "Lowland_Quechua"), "Quechua", # Quechua populations are grouped together as they should be genetically very similar
                               ifelse(Pop == "Maya_Mexico", "Maya_Yucatan", Pop))) %>%
   dplyr::mutate(Pop = dplyr::recode(Pop, "Tibetan" = "East Asia", "Cambodian_Cambodia" = "Cambodian", 
                       "Dai_China" = "Dai", "Daur_China" = "Daur", "Yi_China" = "Yi", 
@@ -62,7 +64,6 @@ figure = genetocn %>%
                       "French_France" = "French", "Russian_Russia" = "Russian", "Orcadian_Orkney" = "Orcadian", 
                       "Tuscan_Italy" = "Tuscan", "Sardinian_Italy" = "Sardinian",
                       # South Asia
-  
                       "Balochi_Pakistan" = "Balochi", "Brahui_Pakistan" = "Brahui", "Burusho_Pakistan" = "Burusho",
                       "Sindhi_Pakistan" = "Sindhi", "Hazara_Pakistan" = "Hazara", "Pathan_Pakistan" = "Pathan",
                       "Makrani_Pakistan" = "Makrani", "Kalash_Pakistan" = "Kalash", 
@@ -94,14 +95,12 @@ figure = genetocn %>%
     xlab("AMY1 Diploid Copy Number") +
     geom_vline(xintercept = median(genetocn %>% 
                                       dplyr::filter(Pop != "Colombian_Colombia" & Pop != "Bantu_SA" & Pop != "San_Namibia") %>% 
-                                      pull(AMY1_rounded)), 
+                                      pull(AMY1_rounded)), # add a median line
             linetype = "dashed", linewidth = 1.2) +
     guides(color=guide_legend(title="Geographic Region"), fill=guide_legend(title="Geographic Region")) +
     theme_minimal() +
     theme(legend.position = "none",
       axis.text.x = element_text(angle = 90))
-
-figure
  
 pdf(file = "~/Desktop/Amylase_Americas/PDFs/Amylase_world_wide_boxplot.pdf", height = 14, width = 6) 
 figure
