@@ -5,13 +5,16 @@ library(forcats)
 Admixture = read.csv("~/Desktop/Amylase_Americas/CSVs/Admixture.csv")
 
 Admixture_long = Admixture %>%
-  dplyr::filter(Pop != "QC_L") %>%
+  dplyr::mutate(
+    Pop = dplyr::recode(Pop, "QC_H" = "Quechua",
+                        "QC_L" = "Quechua")) %>% # Group Quechua Populations together
   pivot_longer(
     cols = starts_with("Fraction"),
     names_to = "Ancestry",
     values_to = "Value")
 
-Admixture_long$Pop <- fct_relevel(Admixture_long$Pop, "QC_H", "MAYA", "PEL", "MXL")
+
+Admixture_long$Pop <- fct_relevel(Admixture_long$Pop, "Quechua", "MAYA", "PEL", "MXL")
 
 admix = ggplot(Admixture_long, aes(x = factor(ID), y = Value, fill = Ancestry)) +
   geom_bar(stat = "identity", position = "stack") +
