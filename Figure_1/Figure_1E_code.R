@@ -23,7 +23,7 @@ admix = ggplot(Admixture_long, aes(x = factor(ID), y = Value, fill = Ancestry)) 
     fill = "Ancestry") +
   scale_fill_manual(
     name = "Ancestry",
-    labels = c("African", "Amerindian", "East Asian", "European"),
+    labels = c("African", "American", "East Asian", "European"),
     values = c("Fraction.AFR" = "#cd1076ff", "Fraction.AMR" = "#ffcc00ff", 
                "Fraction.EAS" = "#ffaaeeff", "Fraction.EUR" = "#ff6600ff")) +
   theme_minimal() +
