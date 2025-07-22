@@ -15,9 +15,9 @@ cd $input_directory
 kmer_direct="/path/to/Kmer/GeneToCN"
 echo "Kmer directory = \"${kmer_direct}\""
 echo "Current directory:" && pwd
-echo "Individual: $individual"
 
 # Have to make sure that just the fastq files end in ".gz" in the directory of interest
+# There is probably a better way to do this but this is what I've got...
 all=$(ls | wc -l | awk '{print $1}')
 echo "Total length of directory: $all"
 paste <(yes $input_directory/ | head -n ${all}) <(ls) > to_be_edited.txt
@@ -26,7 +26,7 @@ sed '/fastqs\.txt/d' ${population}_2.txt | tr '\n' ' ' > locations.txt
 rm to_be_edited.txt
 rm second_file.txt
 
-# added to make ssure other fastq files aren't grabbed by accident
+# added to make sure other fastq files aren't grabbed by accident
 ls | grep ".gz" | sed '/Fastq\.err/d' | sed '/Fastq\.out/d' | sed '/fastqs\.txt/d'  > fastqs.txt
 fastq_files=$(awk '{print $1}' fastqs.txt)
 echo $fastq_files
