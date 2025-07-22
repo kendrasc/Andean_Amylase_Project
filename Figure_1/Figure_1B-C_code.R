@@ -5,12 +5,11 @@ library(rnaturalearth)
 
 # GenetoCN data
 ####################### GenetoCN for Amylase. #####################################################################################
-genetocn = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header=T)
-OKGenomes = read.delim("~/Desktop/Amylase_Americas/1k_genomes.txt")
-HGDPGenomes = read.delim("~/Desktop/Amylase_Americas/HGDP_regions.txt")
+genetocn = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header=T) # copy number data
+OKGenomes = read.delim("~/Desktop/Amylase_Americas/1k_genomes.txt") # IDs + coordinates for 1K genomes
+HGDPGenomes = read.delim("~/Desktop/Amylase_Americas/HGDP_regions.txt") # IDs + coordinates for HGDP
 
-genetocn$AMY1_rounded = round(genetocn$AMY1)
-
+genetocn$AMY1_rounded = round(genetocn$AMY1) # round data to get integers
 
 EAS = c("CDX","KHV", "JPT","Tibetans", "CHB", "CHS", "Cambodian_Cambodia", "Dai_China",
         "Daur_China", "Yi_China", "Tu_China", "Tibetan", "She_China", "Mongolian_China",
@@ -52,6 +51,7 @@ Population.name = c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas", "Tibe
 # Syria = Homs
 # Iraq = Baghdad
 
+# add the additional population locations (I just pulled these from Google based on the city names)
 Population.latitude = c(-12.04000, -10.6674, 16.7569, 30.74822, 24.633333, 13.578889, 24.466667, 34.730833, 33.315278)
 Population.longitude = c(-77.030000, -76.2540, -93.1292, 92.81752, 46.716667, 44.021944, 54.366667, 36.709444, 44.366111)
 additionallocation = data.frame(Population.name, Population.latitude, Population.longitude)
@@ -86,7 +86,6 @@ OKGenomes_medians$Superpopulation.code = with(OKGenomes_medians,
 
 
 world <- map_data("world")
-
 new_world <- ggplot() +
   geom_polygon(data = world, aes(x = long, y = lat, group = group), fill = "grey", alpha = 0.3) +
   geom_point(data = OKGenomes_medians, 
@@ -104,7 +103,7 @@ new_world <- ggplot() +
                                "Additional Americans" = "#800080ff",
                                "Africa" = "#cd1076ff")) +
   labs(fill = "Super Population", size = "Population Median Copy Number") +
-  scale_size_continuous(range = c(3, 20), breaks = c(6.1, 7, 8, 9, 10)) +
+  scale_size_continuous(range = c(3, 20), breaks = c(6.1, 7, 8, 9, 10)) + # I had to go to 6.1 since 6 was too low
   guides(fill = guide_legend(override.aes = list(size = 9))) +
   theme_void() + 
   theme(
