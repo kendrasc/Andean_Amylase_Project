@@ -1,4 +1,3 @@
-setwd("~/Desktop/Amylase_Americas/Andean_LD_analysis")
 library(ggplot2)
 library(dplyr)
 
@@ -8,7 +7,6 @@ population_names = c("YRI","TSI", "STU", "PUR", "PJL", "PEL",
                       "CLM", "CHS", "CHB", "CEU", "CDX", "BEB",
                       "ASW", "ACB", "Quechua", "Maya_Chiapas")
 
-setwd("~/Desktop/Amylase_Americas/SNP_pop_significance_comparison_figure")
 GeneToCN = read.delim("~/Desktop/Amylase_Americas/All_amylase_gene_copy_number.txt", header = TRUE)
 results_df = data.frame(Population = character(), Min_Pvalue = numeric(), SNP_Position = character(), stringsAsFactors = FALSE)
 
