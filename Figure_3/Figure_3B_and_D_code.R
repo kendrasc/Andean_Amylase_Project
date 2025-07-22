@@ -7,9 +7,11 @@ setwd("~/Desktop/Amylase_Americas/")
 Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreate.txt", header = T)
 GeneToCN = read.delim("All_amylase_gene_copy_number.txt", header = T)
 
+# filter to just include SNPs in the amylase region
 Genotype = Genotype %>%
   dplyr::filter(POS > 103343000 & POS < 103960000 )
 
+# organize genotype data
 Genotype = subset(Genotype, select = -CHROM)
 Genotype = Genotype %>%
   mutate(POS = paste0("X", POS))
@@ -21,10 +23,9 @@ rownames(Genotype_transposed) = NULL
 Genotype_transposed = Genotype_transposed %>%
   select(ID, everything())
 
+# Organize populations
 GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
-  dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
-# Above samples are removed because they have 100% non-American ancestry in the amylase locus
   dplyr::mutate(Pop = dplyr::case_when(
     Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua",
     TRUE ~ Pop
