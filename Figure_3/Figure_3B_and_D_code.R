@@ -23,11 +23,13 @@ rownames(Genotype_transposed) = NULL
 Genotype_transposed = Genotype_transposed %>%
   select(ID, everything())
 
-# Organize populations
+# Keep only the Quechua and Maya datasets
+# I also removed three of the samples here as they had 100% non-American ancestry in the locus
+# The samples are "Quechua_Lowland_3", "Quechua_Highland_23", and "Quechua_Highland_24"
 GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
   dplyr::mutate(Pop = dplyr::case_when(
-    Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua",
+    Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua", # group Quechua populations
     TRUE ~ Pop
   ))
 ################################# SNP by Gene Copy Number ###############################
@@ -40,6 +42,7 @@ Genotype_transposed = Genotype_transposed %>%
 Genotype_sorted = Genotype_transposed[order(Genotype_transposed$ID_short),]
 dataset_for_snp_analyses = cbind(GenetoCN_Pops_sorted, Genotype_sorted[, -2])
 
+# group 0|1 and 1|0 as both "Heterozygous"
 dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] = lapply(
   dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)],
   function(x) factor(ifelse(x == "0|0", "Homozygous Ancestral",
@@ -48,13 +51,14 @@ dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] = lapply(
 
 
 ###################### Top SNP by AMY1 Copy Number ##################
+
+# Create comparisons
 my_comparisons = list( c("Homozygous Ancestral", "Heterozygous"), c("Heterozygous", "Homozygous Derived"), c("Homozygous Ancestral", "Homozygous Derived") )
 
-  # Example SNV is the SNV from Figures 3B and 3C
-figure = dataset_for_snp_analyses %>%
-  ggplot(., aes(x = X103614521, y = round(AMY1), color = Pop)) +
+# Example SNV is the SNV from Figures 3B and 3C
+figure = ggplot(dataset_for_snp_analyses, aes(x = X103614521, y = round(AMY1), color = Pop)) +
   geom_boxplot() +
-  stat_compare_means(comparisons = my_comparisons) +
+  stat_compare_means(comparisons = my_comparisons) + # The default here is a pair‑wise Wilcoxon rank‑sum test
   scale_color_manual(values = rep(c("#800080", "#D4AA00"), 22 )) +
   labs(color = "Population") +
   ylim(0, 29) +
