@@ -2,11 +2,14 @@
 library(ggplot2)
 library(dplyr)
 
+# This is the output file created by the "Figure_4A_selescan.sh" code
 selscan_xpehh_test_norm = read.delim("~/Desktop/Amylase_Americas/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
 
+# remove any NAs
 selscan_xpehh_test_norm$normxpehh_no_na = selscan_xpehh_test_norm$normxpehh
 selscan_xpehh_test_norm$normxpehh_no_na[is.na(selscan_xpehh_test_norm$normxpehh_no_na)] = 0
 
+# create a threshold at the 99th percenetile
 threshold_selscan_norm = quantile(abs(selscan_xpehh_test_norm$normxpehh_no_na), 0.99)
 selscan_xpehh_test_norm$in_99th_percentile = ifelse(abs(selscan_xpehh_test_norm$normxpehh_no_na) >= threshold_selscan_norm, "yes", "no")
 
