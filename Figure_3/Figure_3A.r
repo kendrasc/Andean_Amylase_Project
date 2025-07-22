@@ -14,6 +14,7 @@ FST = read.delim("Quechua_Missing_EUR_in_amylase_Maya_all_chr1_biallelic_0.05_1_
 Genotype = read.delim("AllQuechua_Maya_PhasedChr1_no_missing_biallelic_no_EUR_maf_0.05_genotypes_recreated.txt", header = T)
 GeneToCN = read.delim("All_amylase_gene_copy_number.txt", header = T)
 
+# Organize the genotype dataset
 Genotype = subset(Genotype, select = -CHROM)
 Genotype = Genotype %>%
   mutate(POS = paste0("X", POS))
@@ -27,23 +28,29 @@ Genotype_transposed = Genotype_transposed %>%
 
 saveRDS(Genotype_transposed, "AMR_chr1_snps_Quechua_Maya_reordered.rds")
 
+# Keep only the Quechua and Maya datasets
+# I also removed three of the samples here as they had 100% non-American ancestry in the locus
+# The samples are "Quechua_Lowland_3", "Quechua_Highland_23", and "Quechua_Highland_24"
 GenetoCN_Pops = GeneToCN %>%
   dplyr::filter(Pop %in% c("Lowland_Andeans", "Highland_Andeans", "Maya_Chiapas")) %>%
   dplyr::mutate(Pop = dplyr::case_when(
-    Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua",
+    Pop %in% c("Lowland_Andeans", "Highland_Andeans") ~ "Quechua", # group Quechua populations together
     TRUE ~ Pop
   ))
 
 ################################# SNP by Gene Copy Number ###############################
 GenetoCN_Pops_sorted = GenetoCN_Pops[order(GenetoCN_Pops$ID),]
 
+# Fix IDs
 Genotype_transposed = Genotype_transposed %>% 
   mutate(ID_short = sub(".*_", "", ID)) %>% 
   select(ID_short, everything())
 
+# combine the datasets together
 Genotype_sorted = Genotype_transposed[order(Genotype_transposed$ID_short),]
 dataset_for_snp_analyses = cbind(GenetoCN_Pops_sorted, Genotype_sorted[, -1])
 
+# relabel so that 0|1 and 1|0 are both Heterozygous
 dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] = lapply(
   dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)],
   function(x) factor(ifelse(x == "0|0", "Homozygous Ancestral",
@@ -52,7 +59,7 @@ dataset_for_snp_analyses[9:ncol(dataset_for_snp_analyses)] = lapply(
 )
 
 saveRDS(dataset_for_snp_analyses, "AMR_chr1_snps_Quechua_Maya_reordered_with_copy_number.rds")
-dataset_for_snp_analyses$AMY1 = round(dataset_for_snp_analyses$AMY1)
+dataset_for_snp_analyses$AMY1 = round(dataset_for_snp_analyses$AMY1) # round to get integers
 
 Quechua_indices = dataset_for_snp_analyses[[2]] == "Quechua"
 Maya_indices = dataset_for_snp_analyses[[2]] == "Maya_Chiapas"
@@ -60,19 +67,22 @@ Quechua = dataset_for_snp_analyses[Quechua_indices, ]
 Maya = dataset_for_snp_analyses[Maya_indices, ]
 
 AMY1_data = dataset_for_snp_analyses$AMY1
-snp_data = dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)]
+snp_data = dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)] # skip first few columns as they contain additional information
 
+# Calculate KW p-values for each SNP
 Kruskal_pvalue = vapply(snp_data, function(snp) {
   kruskal.test(AMY1_data ~ snp)$p.value
 }, numeric(1))
 
 saveRDS(Kruskal_pvalue, "AMR_chr1_snps_Quechua_Maya_Kruskal_pvalue.rds")
 
+# adjust the p-values with a bonferroni correction
 KW_adj = p.adjust(Kruskal_pvalue, method = "bonferroni") 
 write.csv(KW_adj, "Kruskal_Wallis_Bonferroni_adjusted_p_values.csv")
 
 sig_snps = names(KW_adj)[KW_adj < 0.05]
 
+# Dunn test for SNPs
 dunn_list = lapply(sig_snps, function(snp) {
   res <- dunnTest(AMY1_data ~ dataset_for_snp_analyses[[snp]],
                   method = "bonferroni")$res
@@ -88,6 +98,8 @@ write.csv(dunn_results, "Dunn_test_Quechua_Maya_results.csv")
 Kruskal_pvalue = as.numeric(Kruskal_pvalue)
 
 ##################### X axis #######################
+
+# Script to determine if a SNP is positively associated with AMY1 copy number or negatively
 Kruskal_Wallis_status = numeric()
 Kruskal_Wallis_status = sapply(dataset_for_snp_analyses[, 9:length(dataset_for_snp_analyses)], function(col) {
   
@@ -131,6 +143,7 @@ saveRDS(Kruskal_Wallis_status, "AMR_chr1_snps_Quechua_Maya_Kruskal_Wallis_status
 Quechua = as.data.table(Quechua)
 Maya = as.data.table(Maya)
 
+# Script to determine if derived (technically alternative) status of SNP is more frequent in Quechua or Maya
 FST_status = sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_analyses)], function(col_name) {
   
   col_Quechua = Quechua[[col_name]]
@@ -161,12 +174,12 @@ FST_status = sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_ana
   if (total_Quechua == 0 || total_Maya == 0) {
     return(0)}
   
-  Frequency_Quechua_ancestral = (Hets_Quechua + 2 * Derived_Quechua) / (2 * total_Quechua)
-  Frequency_Maya_ancestral = (Hets_Maya + 2 * Derived_Maya) / (2 * total_Maya)
+  Frequency_Quechua_derived = (Hets_Quechua + 2 * Derived_Quechua) / (2 * total_Quechua)
+  Frequency_Maya_derived = (Hets_Maya + 2 * Derived_Maya) / (2 * total_Maya)
   
-  if (Frequency_Quechua_ancestral > Frequency_Maya_ancestral) {
+  if (Frequency_Quechua_derived > Frequency_Maya_derived) {
     1
-  } else if (Frequency_Maya_ancestral > Frequency_Quechua_ancestral) {
+  } else if (Frequency_Maya_derived > Frequency_Quechua_derived) {
     -1
   } else {
     0
@@ -177,6 +190,8 @@ FST_status = sapply(names(dataset_for_snp_analyses)[9:length(dataset_for_snp_ana
 saveRDS(FST_status, "AMR_chr1_snps_Quechua_Maya_FST_status.rds")
 
 ###################### P-value by FST graph #######################
+
+# Combine everything together
 FST$WEIR_AND_COCKERHAM_FST[FST$WEIR_AND_COCKERHAM_FST < 0] = 0
 FST_directional = FST$WEIR_AND_COCKERHAM_FST*FST_status
 Kruskal_Wallis_status = as.numeric(unlist(Kruskal_Wallis_status))
@@ -185,10 +200,12 @@ FST_by_KW_test = cbind(FST[1:2], Krusal_pvalue_directional, FST_directional)
 FST_by_KW_test$Color_the_figure = FST_by_KW_test$Krusal_pvalue_directional * FST_by_KW_test$FST_directional
 saveRDS(FST_by_KW_test, "AMR_chr1_snps_Quechua_Maya_reordered_with_copy_number_relabeled_Final_dataset.rds")
 
+# label the 99th percentile for KW p-values
 m = length(Kruskal_pvalue)
 bonf_t = -log10(0.01 / m)
 fst_cut = quantile(abs(FST_directional), 0.99, na.rm = TRUE)
 
+# Remove zeros because they inflate the size of the figure and can't be seen
 FST_by_KW_test_no_zero = FST_by_KW_test[ !(FST_by_KW_test$Krusal_pvalue_directional == 0 & FST_by_KW_test$FST_directional == 0) , ]
 figure = ggplot(FST_by_KW_test_no_zero, aes(x = Krusal_pvalue_directional, y = FST_directional, color = Color_the_figure)) +
   geom_point() + 
