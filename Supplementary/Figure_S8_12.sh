@@ -32,17 +32,6 @@ ${PATH_TO_RELATE}/scripts/EstimatePopulationSize/EstimatePopulationSize.sh \
 	--seed 1
 
 
-${PATH_TO_RELATE}/scripts/EstimatePopulationSize/EstimatePopulationSize.sh \
-  -i AllQuechua_Maya_Chr1_no_EUR_no_missing_${test} \
-  -o AllQuechua_Maya_Chr1_no_EUR_no_missing_bypop_mrate_${test} \
-  -m 1.25e-8 \
-  --poplabels ${PATH_TO_FILES}/Quechua_Maya_no_EUR_shared_snps_no_indels_0.05_no_missing_unique.poplabels \
-  --norm_mutrate 1 \
-  --years_per_gen 28 \
-  --bins 3,7,0.2 \
-  --threads 2 \
-  --seed 1
-
 ${PATH_TO_RELATE}/scripts/SampleBranchLengths/ReEstimateBranchLengths.sh \
 	-i AllQuechua_Maya_Chr1_no_EUR_no_missing_${test} \
 	-o AllQuechua_Maya_Chr1_no_EUR_no_missing_bypop_${test} \
@@ -59,14 +48,3 @@ ${PATH_TO_RELATE}/scripts/SampleBranchLengths/SampleBranchLengths.sh \
 	--last_bp 103831082 \
 	--seed 1 \
 	--num_samples 100
-
-${PATH_TO_RELATE}/scripts/TreeView/TreeViewSample.sh \
-	--haps AllQuechua_Maya_Chr1_no_EUR_no_missing.haps \
-	--sample AllQuechua_Maya_Chr1_no_EUR_no_missing.sample \
-	--anc AllQuechua_Maya_Chr1_no_EUR_no_missing_bypop_sampled_${test}.anc \
-	--mut AllQuechua_Maya_Chr1_no_EUR_no_missing_bypop_sampled_${test}.mut \
-	--bp_of_interest 103614521 \
-	--years_per_gen 28 \
-	--poplabels ${PATH_TO_FILES}/Quechua_Maya_no_EUR_shared_snps_no_indels_0.05_no_missing_unique.poplabels \
-	--dist AllQuechua_Maya_Chr1_no_EUR_no_missing_bypop_sampled_${test}.dist \
-	-o 103614521_plot_${test}
