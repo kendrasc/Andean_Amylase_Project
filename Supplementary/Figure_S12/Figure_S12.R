@@ -54,6 +54,8 @@ pbs_comparison = ggplot(data = pbs,
   ggtitle("PBS Chr 1 SNPs: PEL, MXL, & YRI") +
   theme_minimal() + theme(legend.position = "bottom")
 
+write.table(pbs, "~/Desktop/Amylase_Americas/PBS_results.txt")
+
 
 
 ###################### XP-EHH
