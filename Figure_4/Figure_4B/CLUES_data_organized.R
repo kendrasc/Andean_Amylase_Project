@@ -63,7 +63,7 @@ df_maya = tibble(
 )
 df_maya$pop = "Maya"
 
-
+test = rbind(df_maya, df_quechua)
 
 test$pop = factor(test$pop, levels = c("Maya", "Quechua"))
 
