@@ -90,6 +90,6 @@ figure = annotate_figure(
 )
 
 
-pdf("~/Desktop/Amylase_Americas/PDFs/Figure_S3_new.pdf", width = 18, height = 8)
+pdf("~/Desktop/Amylase_Americas/PDFs/Figure_S1.pdf", width = 18, height = 8)
 print(figure)
 dev.off()
