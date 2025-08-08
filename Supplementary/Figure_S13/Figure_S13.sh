@@ -1,4 +1,4 @@
-We used the same output files as Figure 4B and Figure S14 for Quechua.
+We used the same output files as Figure 4B and Figure S12 for Quechua.
 
 ${PATH_TO_RELATE}/scripts/SampleBranchLengths/SampleBranchLengths.sh \
         -i Quechua_PhasedChr1_no_missing_biallelic_no_EUR_${test} \
