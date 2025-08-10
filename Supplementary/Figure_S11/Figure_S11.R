@@ -4,29 +4,28 @@ library(ggtree)
 library(ggpubr)
 
 ################## PBS
-# PBS calculation is based on https://mccoy-lab.github.io/hgv_modules/index.html
-fst_results <- read.table("~/Desktop/Amylase_Americas/fst_results.txt", header = TRUE)
+fst_results <- read.table("~/Desktop/Amylase_Americas/FIN_PEL_MXL.fst", header = TRUE)
 
 fst_results$fst.mxl.pel_no_na = fst_results$fst.mxl.pel
 fst_results$fst.mxl.pel_no_na[is.na(fst_results$fst.mxl.pel_no_na) |
                                 fst_results$fst.mxl.pel_no_na < 0] <- 0
 
 
-fst_results$fst.mxl.yri_no_na = fst_results$fst.mxl.yri
-fst_results$fst.mxl.yri_no_na[is.na(fst_results$fst.mxl.yri_no_na) |
-                                fst_results$fst.mxl.yri_no_na < 0] <- 0
+fst_results$fst.fin.mxl_no_na = fst_results$fst.fin.mxl
+fst_results$fst.fin.mxl_no_na[is.na(fst_results$fst.fin.mxl_no_na) |
+                                fst_results$fst.fin.mxl_no_na < 0] <- 0
 
-fst_results$fst.pel.yri_no_na = fst_results$fst.pel.yri
-fst_results$fst.pel.yri_no_na[is.na(fst_results$fst.pel.yri_no_na) |
-                                fst_results$fst.pel.yri_no_na < 0] <- 0
+fst_results$fst.fin.pel_no_na = fst_results$fst.fin.pel
+fst_results$fst.fin.pel_no_na[is.na(fst_results$fst.fin.pel_no_na) |
+                                fst_results$fst.fin.pel_no_na < 0] <- 0
 
 pbs <- fst_results %>%
   # calculate branch lengths between populations
   mutate(T_mxl_pel = -log(1 - fst.mxl.pel_no_na),
-         T_mxl_yri = -log(1 - fst.mxl.yri_no_na),
-         T_pel_yri = -log(1 - fst.pel.yri_no_na)) %>%
+         T_fin_mxl = -log(1 - fst.fin.mxl_no_na),
+         T_fin_pel = -log(1 - fst.fin.pel_no_na)) %>%
   # calculate pbs
-  mutate(pbs = ((T_mxl_pel + T_pel_yri) - (T_mxl_yri)) / 2) %>%
+  mutate(pbs = ((T_mxl_pel + T_fin_pel) - (T_fin_mxl)) / 2) %>%
   arrange(-pbs)
 
 # Places where the value is negative just means where MXL and PEL don't really differ
@@ -34,15 +33,15 @@ pbs$pbs_no_na = pbs$pbs
 pbs$pbs_no_na[is.na(pbs$pbs_no_na) |
                 pbs$pbs_no_na < 0] <- 0
 
-
 threshold_norm <- quantile(abs(pbs$pbs_no_na), 0.99)
 pbs$in_99th_percentile <- ifelse(abs(pbs$pbs_no_na) >= threshold_norm, "yes", "no")
-
 
 amy_pbs = pbs %>%
   dplyr::filter(POS == 103614521) %>%
   pull(pbs_no_na)
 
+pbs_ordered = pbs[order(-pbs$pbs_no_na),]
+which(pbs_ordered$POS == 103614521)
 
 pbs_comparison = ggplot(data = pbs,
        aes(x = pbs_no_na, fill = in_99th_percentile)) +
@@ -51,7 +50,7 @@ pbs_comparison = ggplot(data = pbs,
   scale_fill_manual(values = c("yes" = "#a02c5aff", "no" = "#ffaaeeff")) +
   ylab("Count") +
   xlab("PBS") +
-  ggtitle("PBS Chr 1 SNPs: PEL, MXL, & YRI") +
+  ggtitle("PBS Chr 1 SNPs: PEL, MXL, & FIN") +
   theme_minimal() + theme(legend.position = "bottom")
 
 write.table(pbs, "~/Desktop/Amylase_Americas/PBS_results.txt")
