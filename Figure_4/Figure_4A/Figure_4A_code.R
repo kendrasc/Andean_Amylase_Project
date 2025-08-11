@@ -3,7 +3,7 @@ library(ggplot2)
 library(dplyr)
 
 # This is the output file created by the "Figure_4A_selescan.sh" code
-selscan_xpehh_test_norm = read.delim("~/Desktop/Amylase_Americas/Quechua_Maya_filtered_2000000_wagh_correct_locations.xpehh.out.norm")
+selscan_xpehh_test_norm = readRDS("Quechua_Maya_filtered_2000000_wagh_correct_locations_xpehh_norm.rds")
 
 # remove any NAs
 selscan_xpehh_test_norm$normxpehh_no_na = selscan_xpehh_test_norm$normxpehh
