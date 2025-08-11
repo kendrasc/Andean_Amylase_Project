@@ -1,6 +1,6 @@
 library(tidyverse)
 
-Quechua = read.delim("~/Desktop/Amylase_Americas/LD_Quechua.hap.ld", header = T)
+Quechua = readRDS("~/Desktop/Amylase_Americas/LD_Quechua.hap.ld.rds", header = T)
 
 LD_snp_of_interest_front_1 <- Quechua %>%
   dplyr::filter(POS2 == "103614521") %>%
