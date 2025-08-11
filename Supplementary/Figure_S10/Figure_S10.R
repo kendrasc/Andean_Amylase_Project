@@ -89,7 +89,7 @@ xpehh_comparison = ggplot(data = selscan_xpehh_test_norm,
 
 ########################## Ohana calculations
 
-map <- read.table("~/Desktop/merged_chr1.map", header = FALSE, stringsAsFactors = FALSE)
+map <- readRDS("merged_chr1.rds")
 colnames(map) <- c("chr", "snp_id", "genetic_dist", "pos")
 
 scan = readRDS("lle-ratios.rds")
