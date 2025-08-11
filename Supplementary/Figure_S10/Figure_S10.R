@@ -4,7 +4,7 @@ library(ggtree)
 library(ggpubr)
 
 ################## PBS
-fst_results <- read.table("~/Desktop/Amylase_Americas/FIN_PEL_MXL.fst", header = TRUE)
+fst_results <- readRDS("FIN_PEL_MXL.rds")
 
 fst_results$fst.mxl.pel_no_na = fst_results$fst.mxl.pel
 fst_results$fst.mxl.pel_no_na[is.na(fst_results$fst.mxl.pel_no_na) |
