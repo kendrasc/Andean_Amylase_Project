@@ -4,7 +4,7 @@ library(viridis)
 library(ggpubr)
 library(ggbreak)
 
-setwd("~/Desktop/Amylase_Americas/Figure_SX_testing_KW/")
+setwd("~/Desktop/Amylase_Americas/")
 GeneToCN = read.delim("All_amylase_gene_copy_number.txt", header = T)
 Unrelated = read.delim("Unrelated_labeled_1k_genomes.txt", header = F) # Just an extra check
 split_vals = do.call(rbind, strsplit(Unrelated$V1, " "))
