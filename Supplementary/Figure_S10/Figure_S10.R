@@ -92,7 +92,7 @@ xpehh_comparison = ggplot(data = selscan_xpehh_test_norm,
 map <- read.table("~/Desktop/merged_chr1.map", header = FALSE, stringsAsFactors = FALSE)
 colnames(map) <- c("chr", "snp_id", "genetic_dist", "pos")
 
-scan = read.delim("~/Desktop/lle-ratios.txt")
+scan = readRDS("lle-ratios.rds")
 
 if (nrow(scan) != nrow(map)) {
   stop("Error: number of SNPs in map and selection scan don't match!")
