@@ -1,0 +1,14 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+authors:
+- family-names: "Scheer"
+  given-names: "Kendra"
+  orcid: "https://orcid.org/0009-0008-0413-6307"
+- family-names: "Landau"
+  given-names: "Luane J. B."
+  orcid: "https://orcid.org/0000-0002-4528-118X"
+title: "Andean_Amylase_Project"
+version: 1.0.0
+doi: 10.5281/zenodo.1234
+date-released: 2026-01-12
+url: "https://github.com/kendrasc/Andean_Amylase_Project"
