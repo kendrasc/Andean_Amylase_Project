@@ -1,5 +1,4 @@
 library(tidyverse)
-library(FSA)
 library(viridis)
 library(ggpubr)
 library(ggbreak)
@@ -152,23 +151,6 @@ Frequencies = sapply(sig_snps_names, function(col_name) {
   Frequency_derived = (Hets + 2 * Derived) / (2 * total)
   return(Frequency_derived)
 })
-
-############################################
-
-# Additional Checks, Dunn test
-dunn_values = lapply(sig_snps_names, function(snp) {
-  res = dunnTest(AMY1_data ~ dataset_for_snp_analyses[[snp]],
-                 method = "bonferroni")$res
-  cbind(SNP = snp,
-        KW_q = KW_adj[[snp]],
-        res)
-})
-
-dunn_results = do.call(rbind, dunn_values)
-if (!is.null(dunn_results) && nrow(dunn_results) > 0) {
-  dunn_results$Pop = pop_name
-  dunn_list[[pop_name]] <- dunn_results
-}
   
 ############# Main figure
 Krusal_pvalue_bonferroni = Kruskal_Wallis_status_sig_snps$Kruskal_Wallis_status_adj*(-log10(as.numeric(unlist(sig_snps))))
