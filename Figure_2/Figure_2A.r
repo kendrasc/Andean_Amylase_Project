@@ -1,7 +1,5 @@
 library(ggplot2)
 library(dplyr)
-library(ggpubr)
-library(forcats)
 library(FSA)
 library(data.table)
 
