@@ -1,6 +1,4 @@
 library(tidyverse)
-library(ape)
-library(ggtree)
 library(ggpubr)
 
 ################## PBS
