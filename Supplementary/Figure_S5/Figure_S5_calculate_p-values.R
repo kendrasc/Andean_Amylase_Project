@@ -1,7 +1,6 @@
 library(tidyverse)
 library(viridis)
 library(ggpubr)
-library(ggbreak)
 
 setwd("~/Desktop/Amylase_Americas/")
 GeneToCN = read.delim("All_amylase_gene_copy_number.txt", header = T)
