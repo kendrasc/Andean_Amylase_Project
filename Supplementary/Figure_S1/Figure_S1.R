@@ -1,7 +1,5 @@
 library(ggplot2)
 library(tidyverse)
-library(ggthemes)
-library(rnaturalearth)
 library(ggpubr)
 
 # GenetoCN data
